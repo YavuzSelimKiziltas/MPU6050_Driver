@@ -20,6 +20,7 @@
 #include "main.h"
 #include "i2c.h"
 #include "gpio.h"
+#include "MPU6050.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -56,6 +57,8 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+MPU6050 sensor;
+
 /* USER CODE END 0 */
 
 /**
@@ -87,6 +90,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
+  MPU6050_Init(&sensor, &hi2c1);
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */

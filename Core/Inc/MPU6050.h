@@ -3,6 +3,8 @@
  *
  * MPU6050 Gyro Sensor Driver
  *
+ * Written According to " MPU-6000 and MPU-6050 Register Map and Descriptions Revision 4.2 "
+ *
  *  Created on: Sep 5, 2023
  *      Author: Yavuz
  */
@@ -12,6 +14,12 @@
 
 // Needed for I2C
 #include "stm32f4xx_hal.h"
+
+
+/*
+ * REGISTERS
+ */
+#define MPU6050_I2C_ADDRESS				(0x68 << 1)		// AD0 == 0 --> 0x68 (Default), AD0 == 1 --> 0x69
 
 /* Self Test Registers */
 #define MPU6050_SELF_TEST_X				0X0D
@@ -100,6 +108,28 @@
 #define MPU6050_WHO_AM_I					0x75
 
 
+/*
+ * DEFINES
+ */
+#define MPU6050_CLK_INTERNAL_8MHZ		0
+#define MPU6050_CLK_PLL_XGYRO				1
+#define MPU6050_CLK_PLL_YGYRO				2
+#define MPU6050_CLK_PLL_ZGYRO				3
+
+#define MPU6050_DEVICE_RESET				7
+#define MPU6050_SLEEP_ENABLE				6
+#define MPU6050_TEMP_DISABLE				3
+
+#define MPU6050_GYRO_FS_250				0
+#define MPU6050_GYRO_FS_500				1
+#define MPU6050_GYRO_FS_1000				2
+#define MPU6050_GYRO_FS_2000				3
+
+#define MPU6050_ACCEL_FS_2					0
+#define MPU6050_ACCEL_FS_4					1
+#define MPU6050_ACCEL_FS_8					2
+#define MPU6050_ACCEL_FS_16 				3
+
 // MPU6050 structure to hold accelorometer and gyro data
 typedef struct
 {
@@ -122,9 +152,31 @@ typedef struct
 } MPU6050;
 
 
+/*
+ * INITIALIZATION FUNCTION
+ */
+uint8_t MPU6050_Init(MPU6050 *dev, I2C_HandleTypeDef *hi2c);
 
+/*
+ * DATA MEASUREMENTS
+ */
+void MPU6050_Read_6Axis(MPU6050 *dev);
 
+void MPU6050_Read_Gyro(int16_t gyro_x, int16_t gyro_y, int16_t gyro_z);
 
+void MPU6050_Read_Accel(int16_t accel_x, int16_t accel_y, int16_t accel_z);
+
+void MPU6050_Read_Temp(int16_t temp);
+/*
+ * LOW - LEVEL FUNCTIONS
+ */
+HAL_StatusTypeDef MPU6050_ReadRegister(MPU6050 *dev, uint8_t reg, uint8_t *data);
+
+HAL_StatusTypeDef MPU6050_ReadRegisters(MPU6050 *dev, uint8_t reg, uint8_t *data, uint8_t length);
+
+HAL_StatusTypeDef MPU6050_WriteRegister(MPU6050 *dev, uint8_t reg, uint8_t *data);
+
+HAL_StatusTypeDef MPU6050_WriteRegisters(MPU6050 *dev, uint8_t reg, uint8_t *data, uint8_t length);
 
 
 #endif /* INC_MPU6050_H_ */
