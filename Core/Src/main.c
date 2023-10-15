@@ -57,7 +57,7 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-MPU6050 sensor;
+MPU6050 mpu6050;
 
 /* USER CODE END 0 */
 
@@ -90,8 +90,12 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
-  MPU6050_Init(&sensor, &hi2c1);
+  MPU6050_Init(&mpu6050, &hi2c1);
   /* USER CODE BEGIN 2 */
+
+  int16_t gyro_x, gyro_y, gyro_z;
+  int16_t temp;
+  int16_t accel_x, accel_y, accel_z;
 
   /* USER CODE END 2 */
 
@@ -101,6 +105,15 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
+//	  MPU6050_Read_Gyro(&mpu6050, &gyro_x, &gyro_y, &gyro_z);
+
+//	  MPU6050_Read_Temp(&mpu6050, &temp);
+
+//	  MPU6050_Read_Accel(&mpu6050, &accel_x, &accel_y, &accel_z);
+
+	  MPU6050_Read_All(&mpu6050);
+
+	  HAL_Delay(2000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

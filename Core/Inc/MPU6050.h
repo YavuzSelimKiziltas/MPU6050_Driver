@@ -135,19 +135,19 @@ typedef struct
 {
 	 I2C_HandleTypeDef *i2cHandle;
 
-    int accel_x;
+    int16_t accel_x;
 
-    int accel_y;
+    int16_t accel_y;
 
-    int accel_z;
+    int16_t accel_z;
 
-    int gyro_x;
+    int16_t gyro_x;
 
-    int gyro_y;
+    int16_t gyro_y;
 
-    int gyro_z;
+    int16_t gyro_z;
 
-    int temp;
+    int16_t temp;
 
 } MPU6050;
 
@@ -160,13 +160,13 @@ uint8_t MPU6050_Init(MPU6050 *dev, I2C_HandleTypeDef *hi2c);
 /*
  * DATA MEASUREMENTS
  */
-void MPU6050_Read_6Axis(MPU6050 *dev);
+void MPU6050_Read_All(MPU6050 *dev);
 
-void MPU6050_Read_Gyro(int16_t gyro_x, int16_t gyro_y, int16_t gyro_z);
+void MPU6050_Read_Gyro(MPU6050 *dev, int16_t *gyro_x, int16_t *gyro_y, int16_t *gyro_z);
 
-void MPU6050_Read_Accel(int16_t accel_x, int16_t accel_y, int16_t accel_z);
+void MPU6050_Read_Accel(MPU6050 *dev, int16_t *accel_x, int16_t *accel_y, int16_t *accel_z);
 
-void MPU6050_Read_Temp(int16_t temp);
+void MPU6050_Read_Temp(MPU6050 *dev, int16_t *temp);
 /*
  * LOW - LEVEL FUNCTIONS
  */

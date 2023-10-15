@@ -1,9 +1,9 @@
 ../Core/Src/MPU6050.c:16:9:MPU6050_Init	24	static
-../Core/Src/MPU6050.c:78:6:MPU6050_Read_6Axis	16	static
-../Core/Src/MPU6050.c:83:6:MPU6050_Read_Gyro	16	static
-../Core/Src/MPU6050.c:88:6:MPU6050_Read_Accel	16	static
-../Core/Src/MPU6050.c:92:6:MPU6050_Read_Temp	16	static
-../Core/Src/MPU6050.c:97:19:MPU6050_ReadRegister	40	static
-../Core/Src/MPU6050.c:102:19:MPU6050_ReadRegisters	40	static
-../Core/Src/MPU6050.c:107:19:MPU6050_WriteRegister	40	static
-../Core/Src/MPU6050.c:112:19:MPU6050_WriteRegisters	40	static
+../Core/Src/MPU6050.c:78:6:MPU6050_Read_All	32	static
+../Core/Src/MPU6050.c:101:6:MPU6050_Read_Gyro	32	static
+../Core/Src/MPU6050.c:118:6:MPU6050_Read_Accel	32	static
+../Core/Src/MPU6050.c:135:6:MPU6050_Read_Temp	24	static
+../Core/Src/MPU6050.c:149:19:MPU6050_ReadRegister	40	static
+../Core/Src/MPU6050.c:154:19:MPU6050_ReadRegisters	40	static
+../Core/Src/MPU6050.c:159:19:MPU6050_WriteRegister	40	static
+../Core/Src/MPU6050.c:164:19:MPU6050_WriteRegisters	40	static

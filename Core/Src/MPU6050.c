@@ -75,23 +75,75 @@ uint8_t MPU6050_Init(MPU6050 *dev, I2C_HandleTypeDef *hi2c)
 }
 
 
-void MPU6050_Read_6Axis(MPU6050 *dev)
+void MPU6050_Read_All(MPU6050 *dev)
 {
+	uint8_t regData[14];
+	int16_t tempRaw;
 
+	MPU6050_ReadRegisters(dev, MPU6050_ACCEL_XOUT_H, regData, 14);
+
+	dev->accel_x = (((int16_t)regData[0]) << 8) | regData[1];
+
+	dev->accel_y = (((int16_t)regData[2]) << 8) | regData[3];
+
+	dev->accel_z = (((int16_t)regData[4]) << 8) | regData[5];
+
+	tempRaw 		 = (((int16_t)regData[6]) << 8) | regData[7];
+	dev->temp	 = (tempRaw / 340) + 36.53;
+
+	dev->gyro_x = (((int16_t)regData[8]) << 8) | regData[9];
+
+	dev->gyro_y = (((int16_t)regData[10]) << 8) | regData[11];
+
+	dev->gyro_z = (((int16_t)regData[12]) << 8) | regData[13];
 }
 
-void MPU6050_Read_Gyro(int16_t gyro_x, int16_t gyro_y, int16_t gyro_z)
+void MPU6050_Read_Gyro(MPU6050 *dev, int16_t *gyro_x, int16_t *gyro_y, int16_t *gyro_z)
 {
+	uint8_t regData[6];
 
+	MPU6050_ReadRegisters(dev, MPU6050_GYRO_XOUT_H, regData, 6);
+
+	*gyro_x = (((int16_t)regData[0]) << 8) | regData[1];
+
+	*gyro_y = (((int16_t)regData[2]) << 8) | regData[3];
+
+	*gyro_z = (((int16_t)regData[4]) << 8) | regData[5];
+
+	dev->gyro_x = *gyro_x;
+	dev->gyro_y = *gyro_y;
+	dev->gyro_z = *gyro_z;
 }
 
-void MPU6050_Read_Accel(int16_t accel_x, int16_t accel_y, int16_t accel_z)
+void MPU6050_Read_Accel(MPU6050 *dev, int16_t *accel_x, int16_t *accel_y, int16_t *accel_z)
 {
+	uint8_t regData[6];
 
+	MPU6050_ReadRegisters(dev, MPU6050_ACCEL_XOUT_H, regData, 6);
+
+	*accel_x = (((int16_t)regData[0]) << 8) | regData[1];
+
+	*accel_y = (((int16_t)regData[2]) << 8) | regData[3];
+
+	*accel_z = (((int16_t)regData[4]) << 8) | regData[5];
+
+	dev->accel_x = *accel_x;
+	dev->accel_y = *accel_y;
+	dev->accel_z = *accel_z;
 }
-void MPU6050_Read_Temp(int16_t temp)
-{
 
+void MPU6050_Read_Temp(MPU6050 *dev, int16_t *temp)
+{
+	uint8_t regData[2];
+
+	MPU6050_ReadRegisters(dev, MPU6050_TEMP_OUT_H, regData, 2);
+
+	*temp= (((int16_t)regData[0]) << 8) | regData[1];
+
+	// Conversion to Celcius (Page 30)
+	*temp = ((*temp) / 340) + 36.53;
+
+	dev->temp = *temp;
 }
 
 HAL_StatusTypeDef MPU6050_ReadRegister(MPU6050 *dev, uint8_t reg, uint8_t *data)
