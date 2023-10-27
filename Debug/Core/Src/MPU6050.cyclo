@@ -3,7 +3,9 @@
 ../Core/Src/MPU6050.c:101:6:MPU6050_Read_Gyro	1
 ../Core/Src/MPU6050.c:118:6:MPU6050_Read_Accel	1
 ../Core/Src/MPU6050.c:135:6:MPU6050_Read_Temp	1
-../Core/Src/MPU6050.c:149:19:MPU6050_ReadRegister	1
-../Core/Src/MPU6050.c:154:19:MPU6050_ReadRegisters	1
-../Core/Src/MPU6050.c:159:19:MPU6050_WriteRegister	1
-../Core/Src/MPU6050.c:164:19:MPU6050_WriteRegisters	1
+../Core/Src/MPU6050.c:150:6:MPU6050_Gyro_SelfTest	4
+../Core/Src/MPU6050.c:222:6:MPU6050_Accel_SelfTest	4
+../Core/Src/MPU6050.c:309:19:MPU6050_ReadRegister	1
+../Core/Src/MPU6050.c:314:19:MPU6050_ReadRegisters	1
+../Core/Src/MPU6050.c:319:19:MPU6050_WriteRegister	1
+../Core/Src/MPU6050.c:324:19:MPU6050_WriteRegisters	1

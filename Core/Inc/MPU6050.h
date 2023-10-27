@@ -130,6 +130,10 @@
 #define MPU6050_ACCEL_FS_8					2
 #define MPU6050_ACCEL_FS_16 				3
 
+#define MPU6050_X_SELFTEST_EN				7
+#define MPU6050_Y_SELFTEST_EN				6
+#define MPU6050_Z_SELFTEST_EN  			5
+
 // MPU6050 structure to hold accelorometer and gyro data
 typedef struct
 {
@@ -167,6 +171,15 @@ void MPU6050_Read_Gyro(MPU6050 *dev, int16_t *gyro_x, int16_t *gyro_y, int16_t *
 void MPU6050_Read_Accel(MPU6050 *dev, int16_t *accel_x, int16_t *accel_y, int16_t *accel_z);
 
 void MPU6050_Read_Temp(MPU6050 *dev, int16_t *temp);
+
+
+/*
+ * SELF TEST MEASUREMENTS
+ */
+void MPU6050_Gyro_SelfTest(MPU6050 *dev, double *xG_change, double *yG_change, double *zG_change);
+
+void MPU6050_Accel_SelfTest(MPU6050 *dev, double *xA_change, double *yA_change, double *zA_change);
+
 /*
  * LOW - LEVEL FUNCTIONS
  */

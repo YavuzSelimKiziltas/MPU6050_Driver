@@ -93,9 +93,12 @@ int main(void)
   MPU6050_Init(&mpu6050, &hi2c1);
   /* USER CODE BEGIN 2 */
 
-  int16_t gyro_x, gyro_y, gyro_z;
-  int16_t temp;
-  int16_t accel_x, accel_y, accel_z;
+//  int16_t gyro_x, gyro_y, gyro_z;
+//  int16_t temp;
+//  int16_t accel_x, accel_y, accel_z;
+
+  double xG_change, yG_change, zG_change;
+  double xA_change, yA_change, zA_change;
 
   /* USER CODE END 2 */
 
@@ -111,9 +114,13 @@ int main(void)
 
 //	  MPU6050_Read_Accel(&mpu6050, &accel_x, &accel_y, &accel_z);
 
-	  MPU6050_Read_All(&mpu6050);
+//	  MPU6050_Read_All(&mpu6050);
 
-	  HAL_Delay(2000);
+	  MPU6050_Gyro_SelfTest(&mpu6050, &xG_change, &yG_change, &zG_change);
+
+	  MPU6050_Accel_SelfTest(&mpu6050, &xA_change, &yA_change, &zA_change);
+
+	  HAL_Delay(100);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

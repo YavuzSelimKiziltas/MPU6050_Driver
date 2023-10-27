@@ -6,7 +6,7 @@
  */
 
 #include "MPU6050.h"
-
+#include <math.h>
 
 /* @brief MPU6050 Sensor initialization function
  * @param Typedef structure that holds i2c handle, gyro and acclerometer data
@@ -145,6 +145,166 @@ void MPU6050_Read_Temp(MPU6050 *dev, int16_t *temp)
 
 	dev->temp = *temp;
 }
+
+
+void MPU6050_Gyro_SelfTest(MPU6050 *dev, double *xG_change, double *yG_change, double *zG_change)
+{
+	uint8_t regData = 0x00;
+
+	uint8_t XG_TEST, YG_TEST, ZG_TEST;
+	double X_FT, Y_FT, Z_FT;
+
+	int16_t X_OUT_ST_EN, Y_OUT_ST_EN, Z_OUT_ST_EN;
+	int16_t X_OUT_ST_DIS, Y_OUT_ST_DIS, Z_OUT_ST_DIS;
+	int16_t X_STR, Y_STR, Z_STR;
+
+
+
+	// Make sure Full Scale Range is +-250 dps & Self Test is enabled
+	MPU6050_ReadRegister(dev, MPU6050_GYRO_CONFIG, &regData);
+	regData |= (MPU6050_GYRO_FS_250 << 3);
+	regData |= (1 << MPU6050_X_SELFTEST_EN) | (1 << MPU6050_Y_SELFTEST_EN) | (1 << MPU6050_Z_SELFTEST_EN);
+	MPU6050_WriteRegister(dev, MPU6050_GYRO_CONFIG, &regData);
+
+	// Gyroscope Output with Self-Test Enabled
+	MPU6050_Read_Gyro(dev, &X_OUT_ST_EN, &Y_OUT_ST_EN, &Z_OUT_ST_EN);
+
+	/* Read Self-Test Registers */
+	MPU6050_ReadRegister(dev, MPU6050_SELF_TEST_X, &regData);
+	XG_TEST = regData & (0x1F);
+
+	MPU6050_ReadRegister(dev, MPU6050_SELF_TEST_Y, &regData);
+	YG_TEST = regData & (0x1F);
+
+	MPU6050_ReadRegister(dev, MPU6050_SELF_TEST_Z, &regData);
+	ZG_TEST = regData & (0x1F);
+
+	// Calculate Gyro_X Factory Trim Value
+	if(XG_TEST == 0)
+		X_FT = 0;
+	else
+		X_FT = 25 * 131 * pow(1.046, XG_TEST - 1);
+
+	// Calculate Gyro_Y Factory Trim Value
+	if(YG_TEST == 0)
+		Y_FT = 0;
+	else
+		Y_FT = -25 * 131 * pow(1.046, YG_TEST - 1);
+
+	// Calculate Gyro_Z Factory Trim Value
+	if(ZG_TEST == 0)
+		Z_FT = 0;
+	else
+		Z_FT = 25 * 131 * pow(1.046, ZG_TEST - 1);
+
+
+	// Disable Self Test
+	MPU6050_ReadRegister(dev, MPU6050_GYRO_CONFIG, &regData);
+	regData &= ~((1 << MPU6050_X_SELFTEST_EN) | (1 << MPU6050_Y_SELFTEST_EN) | (1 << MPU6050_Z_SELFTEST_EN));
+	MPU6050_WriteRegister(dev, MPU6050_GYRO_CONFIG, &regData);
+
+	// Gyroscope Output with Self-Test Disabled
+	MPU6050_Read_Gyro(dev, &X_OUT_ST_DIS, &Y_OUT_ST_DIS, &Z_OUT_ST_DIS);
+
+	/* Calculate Self Test Response (STR) */
+	X_STR = X_OUT_ST_EN - X_OUT_ST_DIS;
+	Y_STR = Y_OUT_ST_EN - Y_OUT_ST_DIS;
+	Z_STR = Z_OUT_ST_EN - Z_OUT_ST_DIS;
+
+	/* Change from Factory Trim of the Self-Test Response(%) */
+	*xG_change = (X_STR - X_FT) / X_FT;
+
+	*yG_change = (Y_STR - Y_FT) / Y_FT;
+
+	*zG_change = (Z_STR - Z_FT) / Z_FT;
+}
+
+void MPU6050_Accel_SelfTest(MPU6050 *dev, double *xA_change, double *yA_change, double *zA_change)
+{
+	uint8_t regData = 0x00;
+
+	uint8_t XA_TEST, YA_TEST, ZA_TEST;
+	uint8_t XA_TEST_HIGH, YA_TEST_HIGH, ZA_TEST_HIGH;
+	uint8_t XA_TEST_LOW, YA_TEST_LOW, ZA_TEST_LOW;
+
+	double X_FT, Y_FT, Z_FT;
+
+	int16_t X_OUT_ST_EN, Y_OUT_ST_EN, Z_OUT_ST_EN;
+	int16_t X_OUT_ST_DIS, Y_OUT_ST_DIS, Z_OUT_ST_DIS;
+	int16_t X_STR, Y_STR, Z_STR;
+
+
+
+	// Make sure Full Scale Range is +-8 g & Self Test is enabled
+	MPU6050_ReadRegister(dev, MPU6050_ACCEL_CONFIG, &regData);
+	regData |= (MPU6050_ACCEL_FS_8 << 3);
+	regData |= (1 << MPU6050_X_SELFTEST_EN) | (1 << MPU6050_Y_SELFTEST_EN) | (1 << MPU6050_Z_SELFTEST_EN);
+	MPU6050_WriteRegister(dev, MPU6050_ACCEL_CONFIG, &regData);
+
+	// Accelerometer Output with Self-Test Enabled
+	MPU6050_Read_Accel(dev, &X_OUT_ST_EN, &Y_OUT_ST_EN, &Z_OUT_ST_EN);
+
+	/* Read Self-Test Registers */
+	MPU6050_ReadRegister(dev, MPU6050_SELF_TEST_X, &regData);
+	XA_TEST_HIGH = (regData & (0xE0)) >> 5;
+	MPU6050_ReadRegister(dev, MPU6050_SELF_TEST_A, &regData);
+	XA_TEST_LOW  = (regData & (0x30)) >> 4;
+
+	MPU6050_ReadRegister(dev, MPU6050_SELF_TEST_Y, &regData);
+	YA_TEST_HIGH = (regData & (0xE0)) >> 5;
+	MPU6050_ReadRegister(dev, MPU6050_SELF_TEST_A, &regData);
+	YA_TEST_LOW  = (regData & (0x0C)) >> 2;
+
+	MPU6050_ReadRegister(dev, MPU6050_SELF_TEST_Z, &regData);
+	ZA_TEST_HIGH = (regData & (0xE0)) >> 5;
+	MPU6050_ReadRegister(dev, MPU6050_SELF_TEST_A, &regData);
+	ZA_TEST_LOW  = regData & (0x03);
+
+	XA_TEST = (XA_TEST_HIGH << 2) + XA_TEST_LOW;
+	YA_TEST = (YA_TEST_HIGH << 2) + YA_TEST_LOW;
+	ZA_TEST = (ZA_TEST_HIGH << 2) + ZA_TEST_LOW;
+
+	// Calculate Accel_X Factory Trim Value
+	if(XA_TEST == 0)
+		X_FT = 0;
+	else
+		X_FT = 4096 * 0.34 * pow(0.92 / 0.34, (XA_TEST - 1) / 30);
+
+	// Calculate Accel_Y Factory Trim Value
+	if(YA_TEST == 0)
+		Y_FT = 0;
+	else
+		Y_FT = 4096 * 0.34 * pow(0.92 / 0.34, (YA_TEST - 1) / 30);
+
+	// Calculate Accel_Z Factory Trim Value
+	if(ZA_TEST == 0)
+		Z_FT = 0;
+	else
+		Z_FT = 4096 * 0.34 * pow(0.92 / 0.34, (ZA_TEST - 1) / 30);
+
+
+	// Disable Self Test
+	MPU6050_ReadRegister(dev, MPU6050_ACCEL_CONFIG, &regData);
+	regData &= ~((1 << MPU6050_X_SELFTEST_EN) | (1 << MPU6050_Y_SELFTEST_EN) | (1 << MPU6050_Z_SELFTEST_EN));
+	MPU6050_WriteRegister(dev, MPU6050_ACCEL_CONFIG, &regData);
+
+	// Accelerometer Output with Self-Test Disabled
+	MPU6050_Read_Accel(dev, &X_OUT_ST_DIS, &Y_OUT_ST_DIS, &Z_OUT_ST_DIS);
+
+	/* Calculate Self Test Response (STR) */
+	X_STR = X_OUT_ST_EN - X_OUT_ST_DIS;
+	Y_STR = Y_OUT_ST_EN - Y_OUT_ST_DIS;
+	Z_STR = Z_OUT_ST_EN - Z_OUT_ST_DIS;
+
+	/* Change from Factory Trim of the Self-Test Response(%) */
+	*xA_change = (X_STR - X_FT) / X_FT;
+
+	*yA_change = (Y_STR - Y_FT) / Y_FT;
+
+	*zA_change = (Z_STR - Z_FT) / Z_FT;
+}
+
+
 
 HAL_StatusTypeDef MPU6050_ReadRegister(MPU6050 *dev, uint8_t reg, uint8_t *data)
 {
