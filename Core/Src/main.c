@@ -121,6 +121,7 @@ int main(void)
 	  MPU6050_Accel_SelfTest(&mpu6050, &xA_change, &yA_change, &zA_change);
 
 	  HAL_Delay(100);
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

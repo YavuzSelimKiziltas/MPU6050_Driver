@@ -9,7 +9,7 @@
 #include <math.h>
 
 /* @brief MPU6050 Sensor initialization function
- * @param Typedef structure that holds i2c handle, gyro and acclerometer data
+ * @param Typedef structure that holds i2c handle, gyro and accelerometer and temperature data
  * @param Related I2C Handle
  * @retval Returns the number of errors during initialization
  * */
@@ -75,6 +75,10 @@ uint8_t MPU6050_Init(MPU6050 *dev, I2C_HandleTypeDef *hi2c)
 }
 
 
+/* @brief  Reads Gyro, Acceleroemter and Temperature data and stores it inside MPU6050 Typedef Struct
+ * @param  Typedef structure that holds i2c handle, gyro and accelerometer data
+ * @retval None
+ * */
 void MPU6050_Read_All(MPU6050 *dev)
 {
 	uint8_t regData[14];
@@ -98,6 +102,11 @@ void MPU6050_Read_All(MPU6050 *dev)
 	dev->gyro_z = (((int16_t)regData[12]) << 8) | regData[13];
 }
 
+/* @brief  Reads only Gyro data and stores it inside function parameters
+ * @param  Typedef structure that holds i2c handle, gyro and accelerometer data
+ * @param  int16_t type parameters to hold 3 axis gyro data
+ * @retval None
+ * */
 void MPU6050_Read_Gyro(MPU6050 *dev, int16_t *gyro_x, int16_t *gyro_y, int16_t *gyro_z)
 {
 	uint8_t regData[6];
@@ -115,6 +124,11 @@ void MPU6050_Read_Gyro(MPU6050 *dev, int16_t *gyro_x, int16_t *gyro_y, int16_t *
 	dev->gyro_z = *gyro_z;
 }
 
+/* @brief  Reads only Accelerometer data and stores it inside function parameters
+ * @param  Typedef structure that holds i2c handle, gyro and accelerometer data
+ * @param  int16_t type parameters to hold 3 axis acceloremeter data
+ * @retval None
+ * */
 void MPU6050_Read_Accel(MPU6050 *dev, int16_t *accel_x, int16_t *accel_y, int16_t *accel_z)
 {
 	uint8_t regData[6];
@@ -132,6 +146,11 @@ void MPU6050_Read_Accel(MPU6050 *dev, int16_t *accel_x, int16_t *accel_y, int16_
 	dev->accel_z = *accel_z;
 }
 
+/* @brief  Reads only Temperature data and stores it inside function parameters
+ * @param  Typedef structure that holds i2c handle, gyro and accelerometer data
+ * @param  int16_t type to store temperature data (In Celcius)
+ * @retval None
+ * */
 void MPU6050_Read_Temp(MPU6050 *dev, int16_t *temp)
 {
 	uint8_t regData[2];
@@ -146,19 +165,20 @@ void MPU6050_Read_Temp(MPU6050 *dev, int16_t *temp)
 	dev->temp = *temp;
 }
 
-
-void MPU6050_Gyro_SelfTest(MPU6050 *dev, double *xG_change, double *yG_change, double *zG_change)
+/* @brief  Performs Self-Test on Gyroscope
+ * @param  Typedef structure that holds i2c handle, gyro and accelerometer data
+ * @param  Double type parameters to hold 3 axis Change from Factory Trim of the Self-Test Response(%)
+ * @retval returns 1 if self-test is succesfull, else returns -1
+ * */
+uint8_t MPU6050_Gyro_SelfTest(MPU6050 *dev, double *xG_change, double *yG_change, double *zG_change)
 {
 	uint8_t regData = 0x00;
-
 	uint8_t XG_TEST, YG_TEST, ZG_TEST;
 	double X_FT, Y_FT, Z_FT;
 
 	int16_t X_OUT_ST_EN, Y_OUT_ST_EN, Z_OUT_ST_EN;
 	int16_t X_OUT_ST_DIS, Y_OUT_ST_DIS, Z_OUT_ST_DIS;
 	int16_t X_STR, Y_STR, Z_STR;
-
-
 
 	// Make sure Full Scale Range is +-250 dps & Self Test is enabled
 	MPU6050_ReadRegister(dev, MPU6050_GYRO_CONFIG, &regData);
@@ -217,9 +237,20 @@ void MPU6050_Gyro_SelfTest(MPU6050 *dev, double *xG_change, double *yG_change, d
 	*yG_change = (Y_STR - Y_FT) / Y_FT;
 
 	*zG_change = (Z_STR - Z_FT) / Z_FT;
+
+	if((*xG_change > 14) || (*xG_change < -14) || (*yG_change > 14) || (*yG_change < -14) || (*zG_change > 14) || (*zG_change < -14))
+		return -1;
+	else
+		return 1;
 }
 
-void MPU6050_Accel_SelfTest(MPU6050 *dev, double *xA_change, double *yA_change, double *zA_change)
+
+/* @brief  Performs Self-Test on Accelerometer
+ * @param  Typedef structure that holds i2c handle, gyro and accelerometer data
+ * @param  Double type parameters to hold 3 axis Change from Factory Trim of the Self-Test Response(%)
+ * @retval returns 1 if self-test is succesfull, else returns -1
+ * */
+uint8_t MPU6050_Accel_SelfTest(MPU6050 *dev, double *xA_change, double *yA_change, double *zA_change)
 {
 	uint8_t regData = 0x00;
 
@@ -232,7 +263,6 @@ void MPU6050_Accel_SelfTest(MPU6050 *dev, double *xA_change, double *yA_change, 
 	int16_t X_OUT_ST_EN, Y_OUT_ST_EN, Z_OUT_ST_EN;
 	int16_t X_OUT_ST_DIS, Y_OUT_ST_DIS, Z_OUT_ST_DIS;
 	int16_t X_STR, Y_STR, Z_STR;
-
 
 
 	// Make sure Full Scale Range is +-8 g & Self Test is enabled
@@ -302,25 +332,56 @@ void MPU6050_Accel_SelfTest(MPU6050 *dev, double *xA_change, double *yA_change, 
 	*yA_change = (Y_STR - Y_FT) / Y_FT;
 
 	*zA_change = (Z_STR - Z_FT) / Z_FT;
+
+	if((*xA_change > 14) || (*xA_change < -14) || (*yA_change > 14) || (*yA_change < -14) || (*zA_change > 14) || (*zA_change < -14))
+		return -1;
+	else
+		return 1;
 }
 
 
-
+/* @brief  Low-Level I2C Read Function
+ * @param  Typedef structure that holds i2c handle, gyro and accelerometer data
+ * @param  reg parameter is the register address from MPU6050
+ * @param  data is the parameter to hold register data
+ * @retval returns HAL_StatusTypeDef
+ * */
 HAL_StatusTypeDef MPU6050_ReadRegister(MPU6050 *dev, uint8_t reg, uint8_t *data)
 {
 	return HAL_I2C_Mem_Read(dev->i2cHandle, MPU6050_I2C_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, data, 1, HAL_MAX_DELAY);
 }
 
+/* @brief  Low-Level I2C Read Function to consecutive Addresses
+ * @param  Typedef structure that holds i2c handle, gyro and accelerometer data
+ * @param  reg parameter is the register address from MPU6050
+ * @param  data is the parameter to hold register data
+ * @param  length is the number of consecutive register address
+ * @retval returns HAL_StatusTypeDef
+ * */
 HAL_StatusTypeDef MPU6050_ReadRegisters(MPU6050 *dev, uint8_t reg, uint8_t *data, uint8_t length)
 {
 	return HAL_I2C_Mem_Read(dev->i2cHandle, MPU6050_I2C_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, data, length, HAL_MAX_DELAY);
 }
 
+
+/* @brief  Low-Level I2C Write Function
+ * @param  Typedef structure that holds i2c handle, gyro and accelerometer data
+ * @param  reg parameter is the register address from MPU6050
+ * @param  data is the parameter that will be written to register address
+ * @retval returns HAL_StatusTypeDef
+ * */
 HAL_StatusTypeDef MPU6050_WriteRegister(MPU6050 *dev, uint8_t reg, uint8_t *data)
 {
 	return HAL_I2C_Mem_Write(dev->i2cHandle, MPU6050_I2C_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, data, 1, HAL_MAX_DELAY);
 }
 
+/* @brief  Low-Level I2C Write Function to Consecutive Addresses
+ * @param  Typedef structure that holds i2c handle, gyro and accelerometer data
+ * @param  reg parameter is the register address from MPU6050
+ * @param  data is the parameter that will be written to register address
+ * @param  length is the number of consecutive register address
+ * @retval returns HAL_StatusTypeDef
+ * */
 HAL_StatusTypeDef MPU6050_WriteRegisters(MPU6050 *dev, uint8_t reg, uint8_t *data, uint8_t length)
 {
 	return HAL_I2C_Mem_Write(dev->i2cHandle, MPU6050_I2C_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, data, length, HAL_MAX_DELAY);

@@ -176,9 +176,9 @@ void MPU6050_Read_Temp(MPU6050 *dev, int16_t *temp);
 /*
  * SELF TEST MEASUREMENTS
  */
-void MPU6050_Gyro_SelfTest(MPU6050 *dev, double *xG_change, double *yG_change, double *zG_change);
+uint8_t MPU6050_Gyro_SelfTest(MPU6050 *dev, double *xG_change, double *yG_change, double *zG_change);
 
-void MPU6050_Accel_SelfTest(MPU6050 *dev, double *xA_change, double *yA_change, double *zA_change);
+uint8_t MPU6050_Accel_SelfTest(MPU6050 *dev, double *xA_change, double *yA_change, double *zA_change);
 
 /*
  * LOW - LEVEL FUNCTIONS
